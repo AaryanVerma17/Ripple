@@ -1,0 +1,153 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { FormEvent } from "react";
+import { ReactFlow, Background, Controls, MiniMap, Edge, Node } from "@xyflow/react";
+import { Activity, AlertTriangle, ArrowDownRight, CheckCircle2, ClipboardCheck, Cpu, FileText, GitBranch, History, LayoutDashboard, Network, Play, ShieldCheck, UploadCloud, Workflow, Zap } from "lucide-react";
+
+const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
+type Entity = {id:string;type:string;name:string;category?:string;description?:string;parameters?:Record<string,{value:number;unit:string}>};
+type EdgeData = {id:string;source_id:string;target_id:string;type:string;rationale?:string};
+type Report = {analysis_id:string;status:string;overall_status:string;change_summary:string;findings:any[];unresolved_questions:string[];required_tests:string[];direct_impacts:number;indirect_impacts:number;ai_synthesis?:any;created_at:string;impacts?:any[];change?:any;fixture_notice?:string};
+const nav = [
+  {id:"overview",label:"Overview",icon:LayoutDashboard},
+  {id:"graph",label:"Product graph",icon:Network},
+  {id:"analysis",label:"Change analysis",icon:Workflow},
+  {id:"history",label:"Analysis history",icon:History}
+];
+
+export default function Home() {
+  const [tab,setTab] = useState("overview");
+  const [project,setProject] = useState<any>(null);
+  const [entities,setEntities] = useState<Entity[]>([]);
+  const [edges,setEdges] = useState<EdgeData[]>([]);
+  const [history,setHistory] = useState<Report[]>([]);
+  const [report,setReport] = useState<Report|null>(null);
+  const [target,setTarget] = useState("MTR-01");
+  const [parameter,setParameter] = useState("rated_voltage");
+  const [value,setValue] = useState("24");
+  const [unit,setUnit] = useState("V");
+  const [description,setDescription] = useState("Replace the current 12 V motor with a 24 V motor. Identify everything that needs to be reconsidered.");
+  const [reason,setReason] = useState("Evaluate an alternative motor");
+  const [loading,setLoading] = useState(false);
+  const [error,setError] = useState("");
+  const [notice,setNotice] = useState("");
+  const [decision,setDecision] = useState("approved");
+  const [reviewer,setReviewer] = useState("Demo reviewer");
+  const [comments,setComments] = useState("");
+
+  const load = useCallback(async () => {
+    try {
+      const [p,g,h] = await Promise.all([
+        fetch(`${API}/api/v1/projects/ROVER-ALPHA`),
+        fetch(`${API}/api/v1/projects/ROVER-ALPHA/graph`),
+        fetch(`${API}/api/v1/projects/ROVER-ALPHA/history`)
+      ]);
+      if(!p.ok || !g.ok || !h.ok) throw new Error("API returned an error. Check that the FastAPI service is running.");
+      const pd = await p.json(), gd = await g.json(), hd = await h.json();
+      setProject(pd); setEntities(gd.nodes); setEdges(gd.edges); setHistory(hd);
+    } catch(e:any) { setError(e.message || "Could not connect to Ripple API."); }
+  },[]);
+  useEffect(()=>{load()},[load]);
+
+  const graphData = useMemo(()=>{
+    const nodes:Node[] = entities.map((e,i)=>({
+      id:e.id, position:{x: (i%3)*230 + 30, y:Math.floor(i/3)*125+25},
+      data:{label:<div className="graph-node"><strong>{e.id}</strong><span>{e.name}</span><small className="muted">{e.type}</small></div>},
+      style:{width:160,background:"transparent",border:"none",padding:0}
+    }));
+    const known = new Set(entities.map(e=>e.id));
+    const graphEdges:Edge[] = edges.filter(e=>known.has(e.source_id)&&known.has(e.target_id)).map(e=>({
+      id:e.id,source:e.source_id,target:e.target_id,label:e.type.replaceAll("_"," ").toLowerCase(),
+      animated: report?.impacts?.some((x:any)=>x.entity_id===e.source_id||x.entity_id===e.target_id) || false,
+      style:{stroke:"#91a899",strokeWidth:1.5},labelStyle:{fontSize:9,fill:"#61776a"},labelBgStyle:{fill:"#f5f5f0"}
+    }));
+    return {nodes,edges:graphEdges};
+  },[entities,edges,report]);
+
+  async function runAnalysis(e:FormEvent) {
+    e.preventDefault(); setLoading(true); setError(""); setNotice(""); setReport(null);
+    try {
+      const res = await fetch(`${API}/api/v1/projects/ROVER-ALPHA/changes`,{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({target_entity_id:target,parameter,proposed_value:Number(value),unit,change_description:description,reason})
+      });
+      const body = await res.json();
+      if(!res.ok) throw new Error(body.detail || "Analysis failed.");
+      setReport(body); setTab("analysis"); setNotice("Analysis completed. Engineering review is still required."); await load();
+    } catch(e:any) {setError(e.message || "Analysis failed.");}
+    finally {setLoading(false);}
+  }
+
+  async function saveDecision(e:FormEvent) {
+    e.preventDefault(); if(!report)return; setError("");setNotice("");
+    try {
+      const res=await fetch(`${API}/api/v1/analyses/${report.analysis_id}/decision`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({decision,reviewer,comments})});
+      const body=await res.json();if(!res.ok)throw new Error(body.detail||"Could not save review decision.");
+      setNotice(`Review decision recorded: ${body.decision}. This records the reviewer action; it does not certify the design.`); await load();
+    } catch(e:any){setError(e.message||"Decision failed.");}
+  }
+
+  const activeReport=report;
+  return <div className="shell">
+    <aside className="sidebar">
+      <div className="brand">ripple<small>ENGINEERING INTELLIGENCE</small></div>
+      <div className="nav">{nav.map(n=><button key={n.id} className={tab===n.id?"active":""} onClick={()=>setTab(n.id)}><n.icon size={16}/>{n.label}</button>)}</div>
+      <div className="sidebar-note"><ShieldCheck size={16}/><p>Evidence first.<br/>Deterministic where possible.<br/>Engineer reviewed by design.</p><span className="mono">BUILD 1.0.0 · MVP</span></div>
+    </aside>
+    <main className="main">
+      <div className="topbar"><div><div className="eyebrow">Workspace / Rover Alpha</div><h1>{tab==="overview"?"Engineering overview":tab==="graph"?"Product dependency graph":tab==="analysis"?"Change impact analysis":"Analysis history"}</h1><div className="subtitle">Understand what else must change when one part of a product changes.</div></div><span className="pill"><span>●</span> {project?"Sample project loaded":"Connecting to API"}</span></div>
+      {error&&<div className="error" style={{marginBottom:14}}>{error}</div>}
+      {notice&&<div className="success" style={{marginBottom:14}}>{notice}</div>}
+      {!project&&!error&&<div className="loading">Connecting to Ripple API…</div>}
+      {tab==="overview"&&project&&<Overview project={project} entities={entities} history={history} setTab={setTab} setReport={setReport}/>}
+      {tab==="graph"&&<section className="panel"><div className="section-title"><div><h2>Typed relationships</h2><div className="muted" style={{fontSize:12,marginTop:5}}>Select a node to inspect its entity ID. Edges show recorded relationships, not inferred certainty.</div></div><span className="pill">{entities.length} entities</span></div><div className="graph-wrap"><ReactFlow nodes={graphData.nodes} edges={graphData.edges} fitView minZoom={0.2} maxZoom={1.7}><Background color="#dfe5dc" gap={20}/><Controls/><MiniMap nodeColor="#c8d9cc" maskColor="#f5f5f0bb"/></ReactFlow></div><div className="footer">Impact traversal follows recorded relationship direction. Missing or ambiguous relationships are surfaced as unknowns rather than inferred as confirmed compatibility.</div></section>}
+      {tab==="analysis"&&<div className="columns">
+        <section className="panel"><div className="section-title"><h2>Propose a change</h2><Zap size={18}/></div>
+          <form onSubmit={runAnalysis}>
+            <div className="field"><label>Target component or entity</label><select value={target} onChange={e=>{setTarget(e.target.value);const ent=entities.find(x=>x.id===e.target.value);const first=ent?.parameters?Object.keys(ent.parameters)[0]:"";if(first)setParameter(first)}}>{entities.filter(e=>["component","subsystem","requirement"].includes(e.type)).map(e=><option key={e.id} value={e.id}>{e.id} — {e.name}</option>)}</select></div>
+            <div className="field"><label>Change description</label><textarea value={description} onChange={e=>setDescription(e.target.value)} required minLength={5}/></div>
+            <div className="formrow"><div className="field"><label>Parameter</label><input value={parameter} onChange={e=>setParameter(e.target.value)} required/></div><div className="field"><label>Proposed value</label><input type="number" step="any" value={value} onChange={e=>setValue(e.target.value)} required/></div></div>
+            <div className="formrow"><div className="field"><label>Unit</label><input value={unit} onChange={e=>setUnit(e.target.value)} required/></div><div className="field"><label>Reason (optional)</label><input value={reason} onChange={e=>setReason(e.target.value)}/></div></div>
+            <button className="btn primary" disabled={loading} type="submit"><Play size={14} style={{display:"inline",marginRight:7}}/>{loading?"Analyzing dependencies…":"Run impact analysis"}</button>
+          </form>
+          <div className="footer">The baseline is preserved. This MVP rejects silent unit mismatches and does not equate a motor's rated voltage with the driver's input limit.</div>
+        </section>
+        <section className="panel"><div className="section-title"><h2>Latest impact report</h2><ClipboardCheck size={18}/></div>{activeReport?<ReportView report={activeReport}/>:<div className="empty"><Activity size={28}/><p>Run a change analysis to see graph impacts, rule results, unresolved questions, and the AI synthesis status.</p></div>}</section>
+        {activeReport&&<section className="panel" style={{gridColumn:"1 / -1"}}><div className="section-title"><h2>Engineer review</h2><ShieldCheck size={18}/></div><form onSubmit={saveDecision}><div className="formrow"><div className="field"><label>Decision to record</label><select value={decision} onChange={e=>setDecision(e.target.value)}><option value="approved">Approved (review workflow record)</option><option value="rejected">Rejected</option><option value="needs_revision">Needs revision</option></select></div><div className="field"><label>Reviewer</label><input value={reviewer} onChange={e=>setReviewer(e.target.value)} required/></div></div><div className="field"><label>Comments</label><textarea value={comments} onChange={e=>setComments(e.target.value)} placeholder="Document the rationale, outstanding evidence, or follow-up work."/></div><button className="btn primary" type="submit">Record review decision</button><div className="footer">This records a human workflow decision only. The application does not provide engineering certification or regulatory approval.</div></form></section>}
+      </div>}
+      {tab==="history"&&<section className="panel"><div className="section-title"><h2>Saved analysis runs</h2><History size={18}/></div>{history.length===0?<div className="empty">No saved analyses yet. Run your first change analysis.</div>:<div style={{overflowX:"auto"}}><table className="table"><thead><tr><th>Analysis</th><th>Change</th><th>Status</th><th>Review decision</th><th>Created</th><th></th></tr></thead><tbody>{history.map(h=><tr key={h.analysis_id}><td className="mono">{h.analysis_id}</td><td>{h.change_summary}</td><td><span className="status review_required">{h.overall_status}</span></td><td>{h.review_decision ? `${h.review_decision.decision} · ${h.review_decision.reviewer}` : "Not recorded"}</td><td>{new Date(h.created_at).toLocaleString()}</td><td><button className="btn" onClick={async()=>{const r=await fetch(`${API}/api/v1/analyses/${h.analysis_id}`);if(r.ok){setReport(await r.json());setTab("analysis")}}}>Open</button></td></tr>)}</tbody></table></div>}</section>}
+      <div className="footer">RIPPLE · Fictional demonstration dataset · AI-assisted decision support · All findings require qualified engineering review.</div>
+    </main>
+  </div>;
+}
+
+function Overview({project,entities,history,setTab,setReport}:{project:any;entities:Entity[];history:Report[];setTab:(v:string)=>void;setReport:(v:Report|null)=>void}) {
+  const reqs=entities.filter(e=>e.type==="requirement").length;
+  const tests=entities.filter(e=>e.type==="test").length;
+  const components=entities.filter(e=>["component","subsystem"].includes(e.type)).length;
+  return <><div className="grid4">
+    <Metric label="Product revision" value={project.revision} foot="Controlled baseline label" icon={<Cpu size={17}/>}/>
+    <Metric label="Components / subsystems" value={components} foot="Loaded in sample model" icon={<Workflow size={17}/>}/>
+    <Metric label="Requirements" value={reqs} foot="Traceable product constraints" icon={<ClipboardCheck size={17}/>}/>
+    <Metric label="Validation tests" value={tests} foot="Connected verification items" icon={<CheckCircle2 size={17}/>}/>
+  </div>
+  <div className="columns"><section className="panel"><div className="section-title"><h2>Change analysis workflow</h2><ArrowDownRight size={18}/></div>
+    {[["01","Propose a change","Identify the target entity, parameter, proposed value, and reason."],["02","Trace dependencies","Follow explicit typed relationships and preserve the impact path."],["03","Run deterministic checks","Evaluate only rules supported by the available data."],["04","Review evidence and unknowns","Distinguish recorded facts from assumptions and missing information."],["05","Record a decision","A human reviewer records the workflow outcome."]].map(x=><div key={x[0]} style={{display:"flex",gap:13,padding:"12px 0",borderBottom:"1px solid #edf0eb"}}><div className="mono" style={{color:"#9a7940"}}>{x[0]}</div><div><strong style={{fontSize:13}}>{x[1]}</strong><div className="muted" style={{fontSize:12,lineHeight:1.5,marginTop:4}}>{x[2]}</div></div></div>)}
+    <button className="btn primary" style={{marginTop:16}} onClick={()=>setTab("analysis")}>Start change analysis</button>
+  </section><section className="panel"><div className="section-title"><h2>Recent analyses</h2><History size={18}/></div>{history.length===0?<div className="empty"><FileText size={26}/><p>No analysis runs yet.</p><p>Start with the fictional motor voltage scenario.</p></div>:history.slice(0,4).map(h=><button key={h.analysis_id} onClick={async()=>{const r=await fetch(`${API}/api/v1/analyses/${h.analysis_id}`);if(r.ok){setReport(await r.json());setTab("analysis")}}} style={{display:"block",textAlign:"left",width:"100%",border:0,borderBottom:"1px solid #edf0eb",background:"transparent",padding:"13px 0"}}><div className="mono">{h.analysis_id}</div><div style={{fontSize:13,margin:"5px 0"}}>{h.change_summary}</div><span className="status review_required">Review required</span></button>)}</section></div>
+  <section className="panel" style={{marginTop:16}}><div className="section-title"><h2>Product baseline</h2><span className="pill">Fictional fixture</span></div><div style={{overflowX:"auto"}}><table className="table"><thead><tr><th>Entity ID</th><th>Name</th><th>Type</th><th>Recorded parameters</th></tr></thead><tbody>{entities.slice(0,8).map(e=><tr key={e.id}><td className="mono">{e.id}</td><td>{e.name}</td><td>{e.type}</td><td>{Object.entries(e.parameters||{}).map(([k,v])=><span key={k} className="mono" style={{display:"block"}}>{k}: {v.value} {v.unit}</span> )||"—"}</td></tr>)}</tbody></table></div></section>
+  <div className="footer">Dataset records are fictional and intended for product demonstration. Source records are marked as sample data, not real supplier evidence.</div></>;
+}
+
+function Metric({label,value,foot,icon}:{label:string;value:any;foot:string;icon:any}) {return <div className="metric"><div style={{display:"flex",justifyContent:"space-between",color:"#708277"}}><span className="metric-label">{label}</span>{icon}</div><div className="metric-value">{value}</div><div className="metric-foot">{foot}</div></div>}
+
+function ReportView({report}:{report:Report}) {
+ return <div><div style={{display:"flex",justifyContent:"space-between",gap:8,alignItems:"center"}}><span className="mono">{report.analysis_id}</span><span className="status review_required">{report.overall_status}</span></div>
+ <p style={{fontSize:14,lineHeight:1.6}}>{report.change_summary}</p><div className="two"><div className="metric"><div className="metric-label">Direct impacts</div><div className="metric-value">{report.direct_impacts}</div></div><div className="metric"><div className="metric-label">Indirect impacts</div><div className="metric-value">{report.indirect_impacts}</div></div></div>
+ <h3 style={{fontSize:14,marginTop:22}}>Findings ({report.findings?.length||0})</h3>{report.findings?.map((f:any)=><div className="finding" key={f.id}><div style={{display:"flex",justifyContent:"space-between",gap:8,alignItems:"center"}}><span className="mono">{f.id} · {f.category}</span><span className={`status ${f.status}`}>{f.status.replaceAll("_"," ")}</span></div><h3>{f.entity_id||"Change scope"}</h3><p>{f.summary}</p><div className="muted" style={{fontSize:12}}>Path: <span className="mono">{f.impact_path?.join(" → ")||"Not supplied"}</span></div>{f.evidence_ids?.length>0&&<div className="mono" style={{marginTop:7}}>Evidence: {f.evidence_ids.join(", ")}</div>}<p style={{marginTop:8}}><strong>Next step:</strong> {f.recommended_action}</p></div>)}
+ <h3 style={{fontSize:14,marginTop:22}}>Unresolved questions</h3>{report.unresolved_questions?.length?<ul style={{fontSize:13,lineHeight:1.7,paddingLeft:20}}>{report.unresolved_questions.map((q,i)=><li key={i}>{q}</li>)}</ul>:<p className="muted" style={{fontSize:13}}>No unresolved questions recorded.</p>}
+ <h3 style={{fontSize:14,marginTop:22}}>AI synthesis</h3>{report.ai_synthesis?.status==="completed"?<div className="success"><strong>{report.ai_synthesis.model}</strong><p>{report.ai_synthesis.summary}</p>{report.ai_synthesis.review_actions?.map((a:string,i:number)=><div key={i}>• {a}</div>)}</div>:<div className="finding"><span className="status unknown">{report.ai_synthesis?.status||"not available"}</span><p>{report.ai_synthesis?.message||"No AI synthesis returned. Deterministic findings remain the primary report."}</p></div>}
+ <div className="footer">{report.fixture_notice||"Analysis is advisory."} Completed analysis does not imply engineering approval.</div>
+ </div>;
+}

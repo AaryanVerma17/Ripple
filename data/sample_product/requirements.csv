@@ -1,0 +1,6 @@
+id,name,statement,metric,operator,threshold,unit,status
+REQ-PWR-01,Electrical limits respected,Every powered component must operate within its documented electrical limits.,,,,,fictional_sample
+REQ-RUN-01,Runtime target,The rover shall run for at least 1.5 hours on one charge at the standard duty cycle.,runtime_h,>=,1.5,h,fictional_sample
+REQ-SPD-01,Top speed,The rover shall reach at least 1.5 m/s on level ground.,top_speed_mps,>=,1.5,m/s,fictional_sample
+REQ-MASS-01,Mass limit,The assembled rover shall not exceed 6.0 kg.,total_mass_kg,<=,6.0,kg,fictional_sample
+REQ-COST-01,Parts budget,The parts cost (BOM) shall not exceed 260 USD per unit.,bom_cost_usd,<=,260,USD,fictional_sample

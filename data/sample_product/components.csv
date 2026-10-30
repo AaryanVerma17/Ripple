@@ -1,0 +1,11 @@
+id,type,name,category,qty,description,source,status
+MTR-01,component,Drive motor,motor,2,"Brushed DC gear motor, one per drive wheel.",Fictional fixture,fictional_sample
+DRV-01,component,Motor driver,driver,1,Dual-channel DC motor driver.,Fictional fixture,fictional_sample
+BAT-01,component,Battery pack,battery,1,Rechargeable battery pack feeding the main power rail.,Fictional fixture,fictional_sample
+PWR-01,subsystem,Main power rail,rail,1,"Distribution rail between the battery, the driver and the regulator.",Fictional fixture,fictional_sample
+REG-01,component,5 V regulator,regulator,1,Buck regulator that isolates the controller from the main rail.,Fictional fixture,fictional_sample
+CTRL-01,component,Main controller,controller,1,"Motion controller board, supplied at 5 V by REG-01.",Fictional fixture,fictional_sample
+WIR-01,component,Motor wiring harness,wiring,1,Harness between the driver outputs and the motors. Ratings are deliberately NOT recorded in this fixture.,Fictional fixture,fictional_sample
+CHS-01,component,Chassis,chassis,1,Aluminium base chassis.,Fictional fixture,fictional_sample
+BRK-01,component,Motor bracket,bracket,2,Bracket that fixes a motor to the chassis.,Fictional fixture,fictional_sample
+WHL-01,component,Drive wheel,wheel,2,Drive wheel pressed onto the motor shaft.,Fictional fixture,fictional_sample

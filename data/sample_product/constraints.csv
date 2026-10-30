@@ -1,0 +1,14 @@
+id,title,lhs,op,rhs,basis
+R-DRV-IN-MAX,Rail voltage is within the driver's maximum input,"{""entity"": ""PWR-01"", ""param"": ""rail_voltage""}",<=,"{""entity"": ""DRV-01"", ""param"": ""input_voltage_max""}",recorded
+R-DRV-IN-MIN,Rail voltage is above the driver's minimum input,"{""entity"": ""DRV-01"", ""param"": ""input_voltage_min""}",<=,"{""entity"": ""PWR-01"", ""param"": ""rail_voltage""}",recorded
+R-REG-IN-MAX,Rail voltage is within the regulator's maximum input,"{""entity"": ""PWR-01"", ""param"": ""rail_voltage""}",<=,"{""entity"": ""REG-01"", ""param"": ""input_voltage_max""}",recorded
+R-REG-IN-MIN,Rail voltage is above the regulator's minimum input,"{""entity"": ""REG-01"", ""param"": ""input_voltage_min""}",<=,"{""entity"": ""PWR-01"", ""param"": ""rail_voltage""}",recorded
+R-BAT-RAIL,Battery nominal voltage matches the rail (within 15 %),"{""entity"": ""PWR-01"", ""param"": ""rail_voltage""}",within_pct,"{""entity"": ""BAT-01"", ""param"": ""nominal_voltage""}",recorded
+R-MTR-RAIL-OV,Rail is no more than 110 % of the motor's rated voltage,"{""entity"": ""PWR-01"", ""param"": ""rail_voltage""}",<=,"{""entity"": ""MTR-01"", ""param"": ""rated_voltage"", ""factor"": 1.1}",assumption
+R-MTR-RAIL-UV,Rail is at least 80 % of the motor's rated voltage,"{""entity"": ""MTR-01"", ""param"": ""rated_voltage"", ""factor"": 0.8}",<=,"{""entity"": ""PWR-01"", ""param"": ""rail_voltage""}",assumption
+R-DRV-I,Motor current is within the driver's channel limit,"{""entity"": ""MTR-01"", ""param"": ""rated_current""}",<=,"{""entity"": ""DRV-01"", ""param"": ""channel_current_max""}",recorded
+R-BAT-I,Peak current is within the battery's discharge limit,"{""metric"": ""peak_current_a""}",<=,"{""entity"": ""BAT-01"", ""param"": ""max_discharge_current""}",recorded
+R-WIR-V,Rail voltage is within the wiring's voltage rating,"{""entity"": ""PWR-01"", ""param"": ""rail_voltage""}",<=,"{""entity"": ""WIR-01"", ""param"": ""voltage_rating_max""}",recorded
+R-WIR-I,Peak current is within the wiring's current rating,"{""metric"": ""peak_current_a""}",<=,"{""entity"": ""WIR-01"", ""param"": ""current_rating_max""}",recorded
+R-MTR-BRK,Motor mounting pitch matches the bracket,"{""entity"": ""MTR-01"", ""param"": ""mount_pitch_mm""}",==,"{""entity"": ""BRK-01"", ""param"": ""mount_pitch_mm""}",recorded
+R-MTR-WHL,Motor shaft matches the wheel bore,"{""entity"": ""MTR-01"", ""param"": ""shaft_diameter_mm""}",==,"{""entity"": ""WHL-01"", ""param"": ""bore_diameter_mm""}",recorded

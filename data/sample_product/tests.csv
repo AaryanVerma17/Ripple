@@ -1,0 +1,7 @@
+id,name,procedure,status
+TEST-PWR-01,Electrical compatibility test,"Measure supply, driver, regulator and wiring voltages and currents against the recorded limits.",planned
+TEST-MTR-01,Motor loaded-operation test,"Run both motors under representative load and log current, temperature and speed.",planned
+TEST-RUN-01,Endurance run,Drive the standard duty cycle until the battery cut-off and record the elapsed time.,planned
+TEST-SPD-01,Top-speed run,Measure speed over a 10 m level course.,planned
+TEST-MECH-01,Mounting fit check,"Check motor, bracket and wheel fit and alignment.",planned
+TEST-MASS-01,Weigh-in,Weigh the assembled rover.,planned

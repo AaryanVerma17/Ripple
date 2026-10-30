@@ -1,0 +1,1319 @@
+{
+ "project": {
+  "id": "ROVER-ALPHA",
+  "name": "Rover Alpha",
+  "revision": "A",
+  "fictional_fixture": true,
+  "description": "Fictional small electromechanical rover used to demonstrate change impact analysis.",
+  "roles": {
+   "motor": "MTR-01",
+   "driver": "DRV-01",
+   "battery": "BAT-01",
+   "rail": "PWR-01",
+   "regulator": "REG-01",
+   "controller": "CTRL-01",
+   "wheel": "WHL-01"
+  },
+  "rail_follows": {
+   "entity": "BAT-01",
+   "param": "nominal_voltage"
+  },
+  "assumptions": {
+   "load_factor": {
+    "value": 0.5,
+    "label": "Average motor load as a share of peak power",
+    "note": "Used for the runtime estimate. Edit to match the real duty cycle."
+   },
+   "integration_hours_per_part": {
+    "value": 1.5,
+    "label": "Engineering hours to integrate one replaced part"
+   },
+   "retest_hours_per_test": {
+    "value": 4.0,
+    "label": "Engineering hours to re-run one test"
+   },
+   "engineer_rate_usd": {
+    "value": 35.0,
+    "label": "Engineering cost per hour (USD)"
+   }
+  },
+  "param_labels": {
+   "rated_voltage": "Rated voltage",
+   "rated_current": "Rated current",
+   "no_load_speed_rpm": "No-load speed",
+   "mass": "Mass",
+   "unit_cost": "Unit cost",
+   "mount_pitch_mm": "Mounting pitch",
+   "shaft_diameter_mm": "Shaft diameter",
+   "input_voltage_min": "Minimum input voltage",
+   "input_voltage_max": "Maximum input voltage",
+   "channel_current_max": "Channel current limit",
+   "nominal_voltage": "Nominal voltage",
+   "usable_energy": "Usable energy",
+   "max_discharge_current": "Maximum discharge current",
+   "rail_voltage": "Rail voltage",
+   "power_draw": "Power draw",
+   "diameter_mm": "Diameter",
+   "bore_diameter_mm": "Bore diameter",
+   "voltage_rating_max": "Voltage rating",
+   "current_rating_max": "Current rating"
+  },
+  "param_kinds": {
+   "rated_voltage": "rating",
+   "rated_current": "load",
+   "no_load_speed_rpm": "perf",
+   "mass": "mech",
+   "unit_cost": "cost",
+   "mount_pitch_mm": "mech",
+   "shaft_diameter_mm": "mech",
+   "input_voltage_min": "rating",
+   "input_voltage_max": "rating",
+   "channel_current_max": "rating",
+   "nominal_voltage": "supply",
+   "usable_energy": "supply",
+   "max_discharge_current": "rating",
+   "rail_voltage": "supply",
+   "power_draw": "load",
+   "diameter_mm": "mech",
+   "bore_diameter_mm": "mech",
+   "voltage_rating_max": "rating",
+   "current_rating_max": "rating"
+  },
+  "param_dependencies": {
+   "rated_voltage": [
+    "rated_current",
+    "no_load_speed_rpm"
+   ]
+  }
+ },
+ "entities": [
+  {
+   "id": "MTR-01",
+   "type": "component",
+   "name": "Drive motor",
+   "category": "motor",
+   "qty": 2,
+   "aliases": [
+    "motor",
+    "motors",
+    "drive motor",
+    "dc motor",
+    "wheel motor"
+   ],
+   "description": "Brushed DC gear motor, one per drive wheel.",
+   "parameters": {
+    "rated_voltage": [
+     12,
+     "V"
+    ],
+    "rated_current": [
+     4,
+     "A"
+    ],
+    "no_load_speed_rpm": [
+     300,
+     "rpm"
+    ],
+    "mass": [
+     0.42,
+     "kg"
+    ],
+    "unit_cost": [
+     28,
+     "USD"
+    ],
+    "mount_pitch_mm": [
+     31,
+     "mm"
+    ],
+    "shaft_diameter_mm": [
+     6,
+     "mm"
+    ]
+   }
+  },
+  {
+   "id": "DRV-01",
+   "type": "component",
+   "name": "Motor driver",
+   "category": "driver",
+   "qty": 1,
+   "aliases": [
+    "driver",
+    "motor driver",
+    "h-bridge",
+    "h bridge",
+    "motor controller board"
+   ],
+   "description": "Dual-channel DC motor driver.",
+   "parameters": {
+    "input_voltage_min": [
+     9,
+     "V"
+    ],
+    "input_voltage_max": [
+     18,
+     "V"
+    ],
+    "channel_current_max": [
+     5,
+     "A"
+    ],
+    "mass": [
+     0.06,
+     "kg"
+    ],
+    "unit_cost": [
+     16,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "BAT-01",
+   "type": "component",
+   "name": "Battery pack",
+   "category": "battery",
+   "qty": 1,
+   "aliases": [
+    "battery",
+    "pack",
+    "battery pack",
+    "cell",
+    "cells",
+    "lipo"
+   ],
+   "description": "Rechargeable battery pack feeding the main power rail.",
+   "parameters": {
+    "nominal_voltage": [
+     12,
+     "V"
+    ],
+    "usable_energy": [
+     96,
+     "Wh"
+    ],
+    "max_discharge_current": [
+     15,
+     "A"
+    ],
+    "mass": [
+     0.9,
+     "kg"
+    ],
+    "unit_cost": [
+     42,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "PWR-01",
+   "type": "subsystem",
+   "name": "Main power rail",
+   "category": "rail",
+   "qty": 1,
+   "aliases": [
+    "rail",
+    "power rail",
+    "supply",
+    "power system",
+    "main rail"
+   ],
+   "description": "Distribution rail between the battery, the driver and the regulator.",
+   "parameters": {
+    "rail_voltage": [
+     12,
+     "V"
+    ]
+   }
+  },
+  {
+   "id": "REG-01",
+   "type": "component",
+   "name": "5 V regulator",
+   "category": "regulator",
+   "qty": 1,
+   "aliases": [
+    "regulator",
+    "buck",
+    "converter",
+    "buck converter",
+    "5v regulator"
+   ],
+   "description": "Buck regulator that isolates the controller from the main rail.",
+   "isolates": [
+    "supply"
+   ],
+   "parameters": {
+    "input_voltage_min": [
+     7,
+     "V"
+    ],
+    "input_voltage_max": [
+     20,
+     "V"
+    ],
+    "mass": [
+     0.02,
+     "kg"
+    ],
+    "unit_cost": [
+     6,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "CTRL-01",
+   "type": "component",
+   "name": "Main controller",
+   "category": "controller",
+   "qty": 1,
+   "aliases": [
+    "controller",
+    "mcu",
+    "microcontroller",
+    "brain",
+    "main controller"
+   ],
+   "description": "Motion controller board, supplied at 5 V by REG-01.",
+   "parameters": {
+    "power_draw": [
+     5,
+     "W"
+    ],
+    "mass": [
+     0.05,
+     "kg"
+    ],
+    "unit_cost": [
+     22,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "WIR-01",
+   "type": "component",
+   "name": "Motor wiring harness",
+   "category": "wiring",
+   "qty": 1,
+   "aliases": [
+    "wiring",
+    "harness",
+    "wires",
+    "wire",
+    "cable",
+    "cables",
+    "wiring harness"
+   ],
+   "description": "Harness between the driver outputs and the motors. Ratings are deliberately NOT recorded in this fixture.",
+   "parameters": {
+    "mass": [
+     0.15,
+     "kg"
+    ],
+    "unit_cost": [
+     9,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "CHS-01",
+   "type": "component",
+   "name": "Chassis",
+   "category": "chassis",
+   "qty": 1,
+   "aliases": [
+    "chassis",
+    "frame",
+    "body",
+    "base plate"
+   ],
+   "description": "Aluminium base chassis.",
+   "parameters": {
+    "mass": [
+     3.2,
+     "kg"
+    ],
+    "unit_cost": [
+     60,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "BRK-01",
+   "type": "component",
+   "name": "Motor bracket",
+   "category": "bracket",
+   "qty": 2,
+   "aliases": [
+    "bracket",
+    "brackets",
+    "mount",
+    "motor mount",
+    "motor bracket"
+   ],
+   "description": "Bracket that fixes a motor to the chassis.",
+   "parameters": {
+    "mount_pitch_mm": [
+     31,
+     "mm"
+    ],
+    "mass": [
+     0.08,
+     "kg"
+    ],
+    "unit_cost": [
+     5,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "WHL-01",
+   "type": "component",
+   "name": "Drive wheel",
+   "category": "wheel",
+   "qty": 2,
+   "aliases": [
+    "wheel",
+    "wheels",
+    "tire",
+    "tyre"
+   ],
+   "description": "Drive wheel pressed onto the motor shaft.",
+   "parameters": {
+    "diameter_mm": [
+     120,
+     "mm"
+    ],
+    "bore_diameter_mm": [
+     6,
+     "mm"
+    ],
+    "mass": [
+     0.18,
+     "kg"
+    ],
+    "unit_cost": [
+     11,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "REQ-PWR-01",
+   "type": "requirement",
+   "name": "Electrical limits respected",
+   "category": "requirement",
+   "statement": "Every powered component must operate within its documented electrical limits.",
+   "group": "electrical",
+   "aliases": [
+    "electrical requirement"
+   ]
+  },
+  {
+   "id": "REQ-RUN-01",
+   "type": "requirement",
+   "name": "Runtime target",
+   "category": "requirement",
+   "statement": "The rover shall run for at least 1.5 hours on one charge at the standard duty cycle.",
+   "metric": "runtime_h",
+   "operator": ">=",
+   "threshold": 1.5,
+   "unit": "h",
+   "aliases": [
+    "runtime"
+   ]
+  },
+  {
+   "id": "REQ-SPD-01",
+   "type": "requirement",
+   "name": "Top speed",
+   "category": "requirement",
+   "statement": "The rover shall reach at least 1.5 m/s on level ground.",
+   "metric": "top_speed_mps",
+   "operator": ">=",
+   "threshold": 1.5,
+   "unit": "m/s",
+   "aliases": [
+    "speed",
+    "top speed"
+   ]
+  },
+  {
+   "id": "REQ-MASS-01",
+   "type": "requirement",
+   "name": "Mass limit",
+   "category": "requirement",
+   "statement": "The assembled rover shall not exceed 6.0 kg.",
+   "metric": "total_mass_kg",
+   "operator": "<=",
+   "threshold": 6.0,
+   "unit": "kg",
+   "aliases": [
+    "mass limit",
+    "weight limit"
+   ]
+  },
+  {
+   "id": "REQ-COST-01",
+   "type": "requirement",
+   "name": "Parts budget",
+   "category": "requirement",
+   "statement": "The parts cost (BOM) shall not exceed 260 USD per unit.",
+   "metric": "bom_cost_usd",
+   "operator": "<=",
+   "threshold": 260,
+   "unit": "USD",
+   "aliases": [
+    "budget",
+    "cost limit"
+   ]
+  },
+  {
+   "id": "TEST-PWR-01",
+   "type": "test",
+   "name": "Electrical compatibility test",
+   "category": "test",
+   "procedure": "Measure supply, driver, regulator and wiring voltages and currents against the recorded limits."
+  },
+  {
+   "id": "TEST-MTR-01",
+   "type": "test",
+   "name": "Motor loaded-operation test",
+   "category": "test",
+   "procedure": "Run both motors under representative load and log current, temperature and speed."
+  },
+  {
+   "id": "TEST-RUN-01",
+   "type": "test",
+   "name": "Endurance run",
+   "category": "test",
+   "procedure": "Drive the standard duty cycle until the battery cut-off and record the elapsed time."
+  },
+  {
+   "id": "TEST-SPD-01",
+   "type": "test",
+   "name": "Top-speed run",
+   "category": "test",
+   "procedure": "Measure speed over a 10 m level course."
+  },
+  {
+   "id": "TEST-MECH-01",
+   "type": "test",
+   "name": "Mounting fit check",
+   "category": "test",
+   "procedure": "Check motor, bracket and wheel fit and alignment."
+  },
+  {
+   "id": "TEST-MASS-01",
+   "type": "test",
+   "name": "Weigh-in",
+   "category": "test",
+   "procedure": "Weigh the assembled rover."
+  },
+  {
+   "id": "DOC-MTR-01",
+   "type": "document",
+   "name": "Motor datasheet (fictional)",
+   "category": "document",
+   "revision": "A"
+  },
+  {
+   "id": "DOC-DRV-01",
+   "type": "document",
+   "name": "Driver datasheet (fictional)",
+   "category": "document",
+   "revision": "A"
+  },
+  {
+   "id": "DOC-BAT-01",
+   "type": "document",
+   "name": "Battery datasheet (fictional)",
+   "category": "document",
+   "revision": "A"
+  },
+  {
+   "id": "DOC-WIR-01",
+   "type": "document",
+   "name": "Harness drawing (fictional)",
+   "category": "document",
+   "revision": "A"
+  }
+ ],
+ "relationships": [
+  {
+   "id": "REL-001",
+   "source_id": "MTR-01",
+   "type": "INTERFACES_WITH",
+   "target_id": "DRV-01",
+   "rationale": "Motor terminals connect to the driver outputs."
+  },
+  {
+   "id": "REL-002",
+   "source_id": "WIR-01",
+   "type": "CONNECTS",
+   "target_id": "MTR-01",
+   "rationale": "The harness is wired to the motor."
+  },
+  {
+   "id": "REL-003",
+   "source_id": "WIR-01",
+   "type": "CONNECTS",
+   "target_id": "DRV-01",
+   "rationale": "The harness is wired to the driver outputs."
+  },
+  {
+   "id": "REL-004",
+   "source_id": "DRV-01",
+   "type": "POWERED_BY",
+   "target_id": "PWR-01",
+   "rationale": "The driver takes its supply from the main rail."
+  },
+  {
+   "id": "REL-005",
+   "source_id": "REG-01",
+   "type": "POWERED_BY",
+   "target_id": "PWR-01",
+   "rationale": "The regulator takes its input from the main rail."
+  },
+  {
+   "id": "REL-006",
+   "source_id": "PWR-01",
+   "type": "POWERED_BY",
+   "target_id": "BAT-01",
+   "rationale": "The rail is fed by the battery."
+  },
+  {
+   "id": "REL-007",
+   "source_id": "CTRL-01",
+   "type": "POWERED_BY",
+   "target_id": "REG-01",
+   "rationale": "The controller is supplied by the regulator."
+  },
+  {
+   "id": "REL-008",
+   "source_id": "CTRL-01",
+   "type": "CONTROLS",
+   "target_id": "DRV-01",
+   "rationale": "The controller sends commands to the driver."
+  },
+  {
+   "id": "REL-009",
+   "source_id": "MTR-01",
+   "type": "DRIVES",
+   "target_id": "WHL-01",
+   "rationale": "The motor shaft drives the wheel."
+  },
+  {
+   "id": "REL-010",
+   "source_id": "MTR-01",
+   "type": "MOUNTED_ON",
+   "target_id": "BRK-01",
+   "rationale": "The motor is bolted to the bracket."
+  },
+  {
+   "id": "REL-011",
+   "source_id": "BRK-01",
+   "type": "MOUNTED_ON",
+   "target_id": "CHS-01",
+   "rationale": "The bracket is bolted to the chassis."
+  },
+  {
+   "id": "REL-012",
+   "source_id": "MTR-01",
+   "type": "SATISFIES",
+   "target_id": "REQ-SPD-01",
+   "rationale": "Motor speed sets the top speed."
+  },
+  {
+   "id": "REL-013",
+   "source_id": "MTR-01",
+   "type": "SATISFIES",
+   "target_id": "REQ-RUN-01",
+   "rationale": "Motor power draw sets the runtime."
+  },
+  {
+   "id": "REL-014",
+   "source_id": "BAT-01",
+   "type": "SATISFIES",
+   "target_id": "REQ-RUN-01",
+   "rationale": "Battery energy sets the runtime."
+  },
+  {
+   "id": "REL-015",
+   "source_id": "DRV-01",
+   "type": "SATISFIES",
+   "target_id": "REQ-PWR-01",
+   "rationale": "Driver limits are part of the electrical requirement."
+  },
+  {
+   "id": "REL-016",
+   "source_id": "BAT-01",
+   "type": "SATISFIES",
+   "target_id": "REQ-PWR-01",
+   "rationale": "Battery limits are part of the electrical requirement."
+  },
+  {
+   "id": "REL-017",
+   "source_id": "REG-01",
+   "type": "SATISFIES",
+   "target_id": "REQ-PWR-01",
+   "rationale": "Regulator limits are part of the electrical requirement."
+  },
+  {
+   "id": "REL-018",
+   "source_id": "WIR-01",
+   "type": "SATISFIES",
+   "target_id": "REQ-PWR-01",
+   "rationale": "Wiring limits are part of the electrical requirement."
+  },
+  {
+   "id": "REL-019",
+   "source_id": "CHS-01",
+   "type": "SATISFIES",
+   "target_id": "REQ-MASS-01",
+   "rationale": "The chassis is the largest mass item."
+  },
+  {
+   "id": "REL-020",
+   "source_id": "REQ-PWR-01",
+   "type": "VERIFIED_BY",
+   "target_id": "TEST-PWR-01",
+   "rationale": ""
+  },
+  {
+   "id": "REL-021",
+   "source_id": "REQ-RUN-01",
+   "type": "VERIFIED_BY",
+   "target_id": "TEST-RUN-01",
+   "rationale": ""
+  },
+  {
+   "id": "REL-022",
+   "source_id": "REQ-SPD-01",
+   "type": "VERIFIED_BY",
+   "target_id": "TEST-SPD-01",
+   "rationale": ""
+  },
+  {
+   "id": "REL-023",
+   "source_id": "REQ-MASS-01",
+   "type": "VERIFIED_BY",
+   "target_id": "TEST-MASS-01",
+   "rationale": ""
+  },
+  {
+   "id": "REL-024",
+   "source_id": "MTR-01",
+   "type": "VERIFIED_BY",
+   "target_id": "TEST-MTR-01",
+   "rationale": "Motor behaviour is checked under load."
+  },
+  {
+   "id": "REL-025",
+   "source_id": "MTR-01",
+   "type": "VERIFIED_BY",
+   "target_id": "TEST-MECH-01",
+   "rationale": "Motor fit is checked at assembly."
+  },
+  {
+   "id": "REL-026",
+   "source_id": "BRK-01",
+   "type": "VERIFIED_BY",
+   "target_id": "TEST-MECH-01",
+   "rationale": "Bracket fit is checked at assembly."
+  },
+  {
+   "id": "REL-027",
+   "source_id": "MTR-01",
+   "type": "DOCUMENTED_BY",
+   "target_id": "DOC-MTR-01",
+   "rationale": ""
+  },
+  {
+   "id": "REL-028",
+   "source_id": "DRV-01",
+   "type": "DOCUMENTED_BY",
+   "target_id": "DOC-DRV-01",
+   "rationale": ""
+  },
+  {
+   "id": "REL-029",
+   "source_id": "BAT-01",
+   "type": "DOCUMENTED_BY",
+   "target_id": "DOC-BAT-01",
+   "rationale": ""
+  },
+  {
+   "id": "REL-030",
+   "source_id": "WIR-01",
+   "type": "DOCUMENTED_BY",
+   "target_id": "DOC-WIR-01",
+   "rationale": ""
+  }
+ ],
+ "rules": [
+  {
+   "id": "R-DRV-IN-MAX",
+   "title": "Rail voltage is within the driver's maximum input",
+   "category": "electrical_compatibility",
+   "group": "electrical",
+   "lhs": {
+    "entity": "PWR-01",
+    "param": "rail_voltage"
+   },
+   "op": "<=",
+   "rhs": {
+    "entity": "DRV-01",
+    "param": "input_voltage_max"
+   },
+   "remedy": "DRV-01",
+   "basis": "recorded"
+  },
+  {
+   "id": "R-DRV-IN-MIN",
+   "title": "Rail voltage is above the driver's minimum input",
+   "category": "electrical_compatibility",
+   "group": "electrical",
+   "lhs": {
+    "entity": "DRV-01",
+    "param": "input_voltage_min"
+   },
+   "op": "<=",
+   "rhs": {
+    "entity": "PWR-01",
+    "param": "rail_voltage"
+   },
+   "remedy": "DRV-01",
+   "basis": "recorded"
+  },
+  {
+   "id": "R-REG-IN-MAX",
+   "title": "Rail voltage is within the regulator's maximum input",
+   "category": "electrical_compatibility",
+   "group": "electrical",
+   "lhs": {
+    "entity": "PWR-01",
+    "param": "rail_voltage"
+   },
+   "op": "<=",
+   "rhs": {
+    "entity": "REG-01",
+    "param": "input_voltage_max"
+   },
+   "remedy": "REG-01",
+   "basis": "recorded"
+  },
+  {
+   "id": "R-REG-IN-MIN",
+   "title": "Rail voltage is above the regulator's minimum input",
+   "category": "electrical_compatibility",
+   "group": "electrical",
+   "lhs": {
+    "entity": "REG-01",
+    "param": "input_voltage_min"
+   },
+   "op": "<=",
+   "rhs": {
+    "entity": "PWR-01",
+    "param": "rail_voltage"
+   },
+   "remedy": "REG-01",
+   "basis": "recorded"
+  },
+  {
+   "id": "R-BAT-RAIL",
+   "title": "Battery nominal voltage matches the rail (within 15 %)",
+   "category": "electrical_compatibility",
+   "group": "electrical",
+   "lhs": {
+    "entity": "PWR-01",
+    "param": "rail_voltage"
+   },
+   "op": "within_pct",
+   "tol": 15,
+   "rhs": {
+    "entity": "BAT-01",
+    "param": "nominal_voltage"
+   },
+   "remedy": "BAT-01",
+   "basis": "recorded"
+  },
+  {
+   "id": "R-MTR-RAIL-OV",
+   "title": "Rail is no more than 110 % of the motor's rated voltage",
+   "category": "electrical_compatibility",
+   "group": "electrical",
+   "lhs": {
+    "entity": "PWR-01",
+    "param": "rail_voltage"
+   },
+   "op": "<=",
+   "rhs": {
+    "entity": "MTR-01",
+    "param": "rated_voltage",
+    "factor": 1.1
+   },
+   "basis": "assumption",
+   "rail_coupled": true,
+   "assumption": "Motors are expected to run between 80 % and 110 % of rated voltage (project assumption)."
+  },
+  {
+   "id": "R-MTR-RAIL-UV",
+   "title": "Rail is at least 80 % of the motor's rated voltage",
+   "category": "electrical_compatibility",
+   "group": "electrical",
+   "lhs": {
+    "entity": "MTR-01",
+    "param": "rated_voltage",
+    "factor": 0.8
+   },
+   "op": "<=",
+   "rhs": {
+    "entity": "PWR-01",
+    "param": "rail_voltage"
+   },
+   "basis": "assumption",
+   "rail_coupled": true,
+   "assumption": "Motors are expected to run between 80 % and 110 % of rated voltage (project assumption)."
+  },
+  {
+   "id": "R-DRV-I",
+   "title": "Motor current is within the driver's channel limit",
+   "category": "electrical_compatibility",
+   "group": "electrical",
+   "lhs": {
+    "entity": "MTR-01",
+    "param": "rated_current"
+   },
+   "op": "<=",
+   "rhs": {
+    "entity": "DRV-01",
+    "param": "channel_current_max"
+   },
+   "remedy": "DRV-01",
+   "basis": "recorded"
+  },
+  {
+   "id": "R-BAT-I",
+   "title": "Peak current is within the battery's discharge limit",
+   "category": "electrical_compatibility",
+   "group": "electrical",
+   "lhs": {
+    "metric": "peak_current_a"
+   },
+   "op": "<=",
+   "rhs": {
+    "entity": "BAT-01",
+    "param": "max_discharge_current"
+   },
+   "remedy": "BAT-01",
+   "basis": "recorded"
+  },
+  {
+   "id": "R-WIR-V",
+   "title": "Rail voltage is within the wiring's voltage rating",
+   "category": "electrical_compatibility",
+   "group": "electrical",
+   "lhs": {
+    "entity": "PWR-01",
+    "param": "rail_voltage"
+   },
+   "op": "<=",
+   "rhs": {
+    "entity": "WIR-01",
+    "param": "voltage_rating_max"
+   },
+   "remedy": "WIR-01",
+   "basis": "recorded"
+  },
+  {
+   "id": "R-WIR-I",
+   "title": "Peak current is within the wiring's current rating",
+   "category": "electrical_compatibility",
+   "group": "electrical",
+   "lhs": {
+    "metric": "peak_current_a"
+   },
+   "op": "<=",
+   "rhs": {
+    "entity": "WIR-01",
+    "param": "current_rating_max"
+   },
+   "remedy": "WIR-01",
+   "basis": "recorded"
+  },
+  {
+   "id": "R-MTR-BRK",
+   "title": "Motor mounting pitch matches the bracket",
+   "category": "mechanical_fit",
+   "group": "mechanical",
+   "lhs": {
+    "entity": "MTR-01",
+    "param": "mount_pitch_mm"
+   },
+   "op": "==",
+   "tol": 0.2,
+   "rhs": {
+    "entity": "BRK-01",
+    "param": "mount_pitch_mm"
+   },
+   "remedy": "BRK-01",
+   "basis": "recorded"
+  },
+  {
+   "id": "R-MTR-WHL",
+   "title": "Motor shaft matches the wheel bore",
+   "category": "mechanical_fit",
+   "group": "mechanical",
+   "lhs": {
+    "entity": "MTR-01",
+    "param": "shaft_diameter_mm"
+   },
+   "op": "==",
+   "tol": 0.05,
+   "rhs": {
+    "entity": "WHL-01",
+    "param": "bore_diameter_mm"
+   },
+   "remedy": "WHL-01",
+   "basis": "recorded"
+  }
+ ],
+ "catalog": [
+  {
+   "id": "MTR-ALT-12L",
+   "name": "12 V low-power gear motor",
+   "category": "motor",
+   "lead_time_days": 7,
+   "parameters": {
+    "rated_voltage": [
+     12,
+     "V"
+    ],
+    "rated_current": [
+     3.2,
+     "A"
+    ],
+    "no_load_speed_rpm": [
+     280,
+     "rpm"
+    ],
+    "mass": [
+     0.38,
+     "kg"
+    ],
+    "unit_cost": [
+     24,
+     "USD"
+    ],
+    "mount_pitch_mm": [
+     31,
+     "mm"
+    ],
+    "shaft_diameter_mm": [
+     6,
+     "mm"
+    ]
+   }
+  },
+  {
+   "id": "MTR-ALT-24A",
+   "name": "24 V compact gear motor",
+   "category": "motor",
+   "lead_time_days": 10,
+   "parameters": {
+    "rated_voltage": [
+     24,
+     "V"
+    ],
+    "rated_current": [
+     2.2,
+     "A"
+    ],
+    "no_load_speed_rpm": [
+     300,
+     "rpm"
+    ],
+    "mass": [
+     0.4,
+     "kg"
+    ],
+    "unit_cost": [
+     34,
+     "USD"
+    ],
+    "mount_pitch_mm": [
+     31,
+     "mm"
+    ],
+    "shaft_diameter_mm": [
+     6,
+     "mm"
+    ]
+   }
+  },
+  {
+   "id": "MTR-ALT-24B",
+   "name": "24 V high-torque gear motor",
+   "category": "motor",
+   "lead_time_days": 14,
+   "parameters": {
+    "rated_voltage": [
+     24,
+     "V"
+    ],
+    "rated_current": [
+     3.4,
+     "A"
+    ],
+    "no_load_speed_rpm": [
+     260,
+     "rpm"
+    ],
+    "mass": [
+     0.55,
+     "kg"
+    ],
+    "unit_cost": [
+     46,
+     "USD"
+    ],
+    "mount_pitch_mm": [
+     36,
+     "mm"
+    ],
+    "shaft_diameter_mm": [
+     8,
+     "mm"
+    ]
+   }
+  },
+  {
+   "id": "DRV-ALT-36",
+   "name": "36 V dual driver",
+   "category": "driver",
+   "lead_time_days": 6,
+   "parameters": {
+    "input_voltage_min": [
+     12,
+     "V"
+    ],
+    "input_voltage_max": [
+     36,
+     "V"
+    ],
+    "channel_current_max": [
+     8,
+     "A"
+    ],
+    "mass": [
+     0.07,
+     "kg"
+    ],
+    "unit_cost": [
+     24,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "DRV-ALT-18B",
+   "name": "18 V dual driver, 10 A",
+   "category": "driver",
+   "lead_time_days": 5,
+   "parameters": {
+    "input_voltage_min": [
+     8,
+     "V"
+    ],
+    "input_voltage_max": [
+     18,
+     "V"
+    ],
+    "channel_current_max": [
+     10,
+     "A"
+    ],
+    "mass": [
+     0.06,
+     "kg"
+    ],
+    "unit_cost": [
+     19,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "BAT-ALT-24",
+   "name": "24 V battery pack, 96 Wh",
+   "category": "battery",
+   "lead_time_days": 12,
+   "parameters": {
+    "nominal_voltage": [
+     24,
+     "V"
+    ],
+    "usable_energy": [
+     96,
+     "Wh"
+    ],
+    "max_discharge_current": [
+     12,
+     "A"
+    ],
+    "mass": [
+     1.0,
+     "kg"
+    ],
+    "unit_cost": [
+     68,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "BAT-ALT-12XL",
+   "name": "12 V battery pack, 144 Wh",
+   "category": "battery",
+   "lead_time_days": 9,
+   "parameters": {
+    "nominal_voltage": [
+     12,
+     "V"
+    ],
+    "usable_energy": [
+     144,
+     "Wh"
+    ],
+    "max_discharge_current": [
+     20,
+     "A"
+    ],
+    "mass": [
+     1.3,
+     "kg"
+    ],
+    "unit_cost": [
+     64,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "REG-ALT-36",
+   "name": "36 V input buck regulator",
+   "category": "regulator",
+   "lead_time_days": 4,
+   "parameters": {
+    "input_voltage_min": [
+     9,
+     "V"
+    ],
+    "input_voltage_max": [
+     36,
+     "V"
+    ],
+    "mass": [
+     0.03,
+     "kg"
+    ],
+    "unit_cost": [
+     9,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "WIR-ALT-60",
+   "name": "60 V / 10 A rated harness",
+   "category": "wiring",
+   "lead_time_days": 5,
+   "parameters": {
+    "voltage_rating_max": [
+     60,
+     "V"
+    ],
+    "current_rating_max": [
+     10,
+     "A"
+    ],
+    "mass": [
+     0.17,
+     "kg"
+    ],
+    "unit_cost": [
+     14,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "CHS-ALT-LITE",
+   "name": "Lightweight chassis",
+   "category": "chassis",
+   "lead_time_days": 15,
+   "parameters": {
+    "mass": [
+     2.6,
+     "kg"
+    ],
+    "unit_cost": [
+     78,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "BRK-ALT-36",
+   "name": "Motor bracket, 36 mm pitch",
+   "category": "bracket",
+   "lead_time_days": 4,
+   "parameters": {
+    "mount_pitch_mm": [
+     36,
+     "mm"
+    ],
+    "mass": [
+     0.09,
+     "kg"
+    ],
+    "unit_cost": [
+     7,
+     "USD"
+    ]
+   }
+  },
+  {
+   "id": "WHL-ALT-8",
+   "name": "Drive wheel, 8 mm bore",
+   "category": "wheel",
+   "lead_time_days": 6,
+   "parameters": {
+    "diameter_mm": [
+     120,
+     "mm"
+    ],
+    "bore_diameter_mm": [
+     8,
+     "mm"
+    ],
+    "mass": [
+     0.19,
+     "kg"
+    ],
+    "unit_cost": [
+     14,
+     "USD"
+    ]
+   }
+  }
+ ]
+}

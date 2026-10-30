@@ -1,0 +1,37 @@
+services:
+  api:
+    build:
+      context: ./services/api
+    env_file:
+      - path: .env
+        required: false
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-sqlite:////app/data/ripple.db}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ripple_data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: ./apps/web
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  ripple_data:

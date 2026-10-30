@@ -1,0 +1,31 @@
+id,source_id,type,target_id,rationale
+REL-001,MTR-01,INTERFACES_WITH,DRV-01,Motor terminals connect to the driver outputs.
+REL-002,WIR-01,CONNECTS,MTR-01,The harness is wired to the motor.
+REL-003,WIR-01,CONNECTS,DRV-01,The harness is wired to the driver outputs.
+REL-004,DRV-01,POWERED_BY,PWR-01,The driver takes its supply from the main rail.
+REL-005,REG-01,POWERED_BY,PWR-01,The regulator takes its input from the main rail.
+REL-006,PWR-01,POWERED_BY,BAT-01,The rail is fed by the battery.
+REL-007,CTRL-01,POWERED_BY,REG-01,The controller is supplied by the regulator.
+REL-008,CTRL-01,CONTROLS,DRV-01,The controller sends commands to the driver.
+REL-009,MTR-01,DRIVES,WHL-01,The motor shaft drives the wheel.
+REL-010,MTR-01,MOUNTED_ON,BRK-01,The motor is bolted to the bracket.
+REL-011,BRK-01,MOUNTED_ON,CHS-01,The bracket is bolted to the chassis.
+REL-012,MTR-01,SATISFIES,REQ-SPD-01,Motor speed sets the top speed.
+REL-013,MTR-01,SATISFIES,REQ-RUN-01,Motor power draw sets the runtime.
+REL-014,BAT-01,SATISFIES,REQ-RUN-01,Battery energy sets the runtime.
+REL-015,DRV-01,SATISFIES,REQ-PWR-01,Driver limits are part of the electrical requirement.
+REL-016,BAT-01,SATISFIES,REQ-PWR-01,Battery limits are part of the electrical requirement.
+REL-017,REG-01,SATISFIES,REQ-PWR-01,Regulator limits are part of the electrical requirement.
+REL-018,WIR-01,SATISFIES,REQ-PWR-01,Wiring limits are part of the electrical requirement.
+REL-019,CHS-01,SATISFIES,REQ-MASS-01,The chassis is the largest mass item.
+REL-020,REQ-PWR-01,VERIFIED_BY,TEST-PWR-01,
+REL-021,REQ-RUN-01,VERIFIED_BY,TEST-RUN-01,
+REL-022,REQ-SPD-01,VERIFIED_BY,TEST-SPD-01,
+REL-023,REQ-MASS-01,VERIFIED_BY,TEST-MASS-01,
+REL-024,MTR-01,VERIFIED_BY,TEST-MTR-01,Motor behaviour is checked under load.
+REL-025,MTR-01,VERIFIED_BY,TEST-MECH-01,Motor fit is checked at assembly.
+REL-026,BRK-01,VERIFIED_BY,TEST-MECH-01,Bracket fit is checked at assembly.
+REL-027,MTR-01,DOCUMENTED_BY,DOC-MTR-01,
+REL-028,DRV-01,DOCUMENTED_BY,DOC-DRV-01,
+REL-029,BAT-01,DOCUMENTED_BY,DOC-BAT-01,
+REL-030,WIR-01,DOCUMENTED_BY,DOC-WIR-01,

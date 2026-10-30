@@ -1,0 +1,13 @@
+id,name,category,unit_cost_usd,lead_time_days,parameters
+MTR-ALT-12L,12 V low-power gear motor,motor,24,7,"{""rated_voltage"": [12, ""V""], ""rated_current"": [3.2, ""A""], ""no_load_speed_rpm"": [280, ""rpm""], ""mass"": [0.38, ""kg""], ""unit_cost"": [24, ""USD""], ""mount_pitch_mm"": [31, ""mm""], ""shaft_diameter_mm"": [6, ""mm""]}"
+MTR-ALT-24A,24 V compact gear motor,motor,34,10,"{""rated_voltage"": [24, ""V""], ""rated_current"": [2.2, ""A""], ""no_load_speed_rpm"": [300, ""rpm""], ""mass"": [0.4, ""kg""], ""unit_cost"": [34, ""USD""], ""mount_pitch_mm"": [31, ""mm""], ""shaft_diameter_mm"": [6, ""mm""]}"
+MTR-ALT-24B,24 V high-torque gear motor,motor,46,14,"{""rated_voltage"": [24, ""V""], ""rated_current"": [3.4, ""A""], ""no_load_speed_rpm"": [260, ""rpm""], ""mass"": [0.55, ""kg""], ""unit_cost"": [46, ""USD""], ""mount_pitch_mm"": [36, ""mm""], ""shaft_diameter_mm"": [8, ""mm""]}"
+DRV-ALT-36,36 V dual driver,driver,24,6,"{""input_voltage_min"": [12, ""V""], ""input_voltage_max"": [36, ""V""], ""channel_current_max"": [8, ""A""], ""mass"": [0.07, ""kg""], ""unit_cost"": [24, ""USD""]}"
+DRV-ALT-18B,"18 V dual driver, 10 A",driver,19,5,"{""input_voltage_min"": [8, ""V""], ""input_voltage_max"": [18, ""V""], ""channel_current_max"": [10, ""A""], ""mass"": [0.06, ""kg""], ""unit_cost"": [19, ""USD""]}"
+BAT-ALT-24,"24 V battery pack, 96 Wh",battery,68,12,"{""nominal_voltage"": [24, ""V""], ""usable_energy"": [96, ""Wh""], ""max_discharge_current"": [12, ""A""], ""mass"": [1.0, ""kg""], ""unit_cost"": [68, ""USD""]}"
+BAT-ALT-12XL,"12 V battery pack, 144 Wh",battery,64,9,"{""nominal_voltage"": [12, ""V""], ""usable_energy"": [144, ""Wh""], ""max_discharge_current"": [20, ""A""], ""mass"": [1.3, ""kg""], ""unit_cost"": [64, ""USD""]}"
+REG-ALT-36,36 V input buck regulator,regulator,9,4,"{""input_voltage_min"": [9, ""V""], ""input_voltage_max"": [36, ""V""], ""mass"": [0.03, ""kg""], ""unit_cost"": [9, ""USD""]}"
+WIR-ALT-60,60 V / 10 A rated harness,wiring,14,5,"{""voltage_rating_max"": [60, ""V""], ""current_rating_max"": [10, ""A""], ""mass"": [0.17, ""kg""], ""unit_cost"": [14, ""USD""]}"
+CHS-ALT-LITE,Lightweight chassis,chassis,78,15,"{""mass"": [2.6, ""kg""], ""unit_cost"": [78, ""USD""]}"
+BRK-ALT-36,"Motor bracket, 36 mm pitch",bracket,7,4,"{""mount_pitch_mm"": [36, ""mm""], ""mass"": [0.09, ""kg""], ""unit_cost"": [7, ""USD""]}"
+WHL-ALT-8,"Drive wheel, 8 mm bore",wheel,14,6,"{""diameter_mm"": [120, ""mm""], ""bore_diameter_mm"": [8, ""mm""], ""mass"": [0.19, ""kg""], ""unit_cost"": [14, ""USD""]}"
